@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Forma{% endblock %}
+{% block head %}
+  {{ super() }}
+
+{% endblock %}
+{% block content %}
+    <h2>Proyecto MDRSP-2021</h2>
+    <form class="pure-form" method="post">
+      <fieldset>
+        <legend>Llene los campos</legend>
+        <input type="text" placeholder="Usuario de tweeter" name="usuario"/>
+        <input type="number" placeholder="Número de tweets" name="tweets"/>
+        <button type="submit" class="pure-button pure-button-primary">Sign in</button>
+      </fieldset>
+    </form>
+{% endblock %}
+
+
