@@ -7,27 +7,18 @@ Integrantes : Juan Pablo Nahuelpán, Pelegrin Huichalaf
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-#=================================================
-#Importando Librerías
 import tweepy
 from textblob import TextBlob
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
 
-
 def obt(usuario, n, api):
     searched_tweets = [status for status in tweepy.Cursor(api.user_timeline,
-                                                          screen_name = usuario,
-                                                          include_rts = True).items(n)]
+                                                          screen_name=usuario,
+                                                          include_rts=True).items(n)]
     datos = []
     for tweets in searched_tweets:
-        print("___________________________________________")
-        print(tweets.author.screen_name)
-        print(tweets.text)
-        print(tweets.created_at)
-        print(tweets.favorite_count)
-        print("___________________________________________")
         autor = tweets.author.screen_name
         t_id = tweets.id
         texto = tweets.text
@@ -35,14 +26,13 @@ def obt(usuario, n, api):
         retweet_count = tweets.retweet_count
         fecha = tweets.created_at
         
-
         datos.append([str(t_id),
                     str(autor),
                     str(texto),
                     int(like),
                     int(retweet_count),
                     fecha.isoformat()])
-    #datos = np.array(datos)                    
+
     headers = ['Id_Tweet',
                 'Autor',
                 'Texto',
@@ -54,15 +44,12 @@ def obt(usuario, n, api):
 
 def sentimiento(usuario,n, api):
     searched_tweets = [status for status in tweepy.Cursor(api.user_timeline,
-                                                          screen_name = usuario).items(n)]
-
+                                                          screen_name=usuario).items(n)]
     pos = 0
     neg = 0
     neu = 0
     for tweet in searched_tweets:
         text= TextBlob(tweet.text)
-        print(tweet.text)
-
         if text.polarity < 0:
             neg += 1
         elif text.polarity > 0:
@@ -70,14 +57,11 @@ def sentimiento(usuario,n, api):
         else:
             neu += 1
 
-    
-    #Grafico circular
     labels = ['Positivo', 'Negativo', 'Neutro']
     sizes = [pos, neg, neu]
     return sizes, labels
-    
 
-#=================================================
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 global api
@@ -103,7 +87,7 @@ async def forma(request: Request):
 async def forma(request: Request,
                 usuario: str=Form( None ),
                 tweets: int=Form( 0 )):
-        
+
     tweets = abs(tweets) 
 
     aux_data, aux_headers  = sentimiento(usuario, tweets, api)     
@@ -112,6 +96,7 @@ async def forma(request: Request,
     max_retweet = max_retweet.astype(int)
     max_like = np.array(data)[:, [3]]
     max_like = max_like.astype(int)
+
     # regresion lineal.
     lg = LinearRegression().fit(max_retweet, max_like)
     lg_y = [float(y) for y in lg.predict(max_retweet)]
@@ -129,6 +114,3 @@ async def forma(request: Request,
                                         "lg_y": lg_y,
                                         "aux_data": aux_data,
                                         "aux_headers": aux_headers})
-                            
-
-
